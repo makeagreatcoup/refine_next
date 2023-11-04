@@ -105,7 +105,7 @@ const App = (props: React.PropsWithChildren) => {
 
   return (
     <>
-      <GitHubBanner />
+      {/* <GitHubBanner /> */}
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <CssBaseline />
@@ -128,16 +128,16 @@ const App = (props: React.PropsWithChildren) => {
                     canDelete: true,
                   },
                 },
-                {
-                  name: "categories",
-                  list: "/categories",
-                  create: "/categories/create",
-                  edit: "/categories/edit/:id",
-                  show: "/categories/show/:id",
-                  meta: {
-                    canDelete: true,
-                  },
-                },
+                // {
+                //   name: "categories",
+                //   list: "/categories",
+                //   create: "/categories/create",
+                //   edit: "/categories/edit/:id",
+                //   show: "/categories/show/:id",
+                //   meta: {
+                //     canDelete: true,
+                //   },
+                // },
               ]}
               options={{
                 syncWithLocation: true,
