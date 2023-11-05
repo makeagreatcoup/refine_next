@@ -1,4 +1,10 @@
-import { AuthBindings, GitHubBanner, Refine } from "@refinedev/core";
+import {
+  AuthBindings,
+  Authenticated,
+  ErrorComponent,
+  GitHubBanner,
+  Refine,
+} from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import {
   RefineSnackbarProvider,
@@ -6,6 +12,7 @@ import {
   notificationProvider,
 } from "@refinedev/mui";
 import routerProvider, {
+  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/nextjs-router";
 import type { NextPage } from "next";
@@ -13,6 +20,7 @@ import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
 import { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import React from "react";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 
 import { Header } from "@components/header";
 import { ColorModeContextProvider } from "@contexts";
@@ -20,6 +28,12 @@ import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import dataProvider from "@refinedev/simple-rest";
 import { appWithTranslation, useTranslation } from "next-i18next";
+import { MuiCreateInferencer, MuiEditInferencer, MuiInferencer, MuiListInferencer, MuiShowInferencer } from "@refinedev/inferencer/mui";
+import { BlogPostList } from "src/pages/blog-posts/list";
+import { BlogPostEdit } from "src/pages/blog-posts/edit";
+import { BlogPostShow } from "src/pages/blog-posts/show";
+import { BlogPostCreate } from "src/pages/blog-posts/create";
+import CatchAll from "./[...catchAll]";
 
 const API_URL = "https://api.fake-rest.refine.dev";
 
@@ -111,43 +125,71 @@ const App = (props: React.PropsWithChildren) => {
           <CssBaseline />
           <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
           <RefineSnackbarProvider>
-            <Refine
-              routerProvider={routerProvider}
-              dataProvider={dataProvider(API_URL)}
-              notificationProvider={notificationProvider}
-              authProvider={authProvider}
-              i18nProvider={i18nProvider}
-              resources={[
-                {
-                  name: "blog_posts",
-                  list: "/blog-posts",
-                  create: "/blog-posts/create",
-                  edit: "/blog-posts/edit/:id",
-                  show: "/blog-posts/show/:id",
-                  meta: {
-                    canDelete: true,
+            <BrowserRouter>
+              <Refine
+                routerProvider={routerProvider}
+                dataProvider={dataProvider(API_URL)}
+                notificationProvider={notificationProvider}
+                authProvider={authProvider}
+                i18nProvider={i18nProvider}
+                resources={[
+                  {
+                    name: "blog_posts",
+                    list: "/blog-posts",
+                    create: "/blog-posts/create",
+                    edit: "/blog-posts/edit/:id",
+                    show: "/blog-posts/show/:id",
+                    meta: {
+                      canDelete: true,
+                    },
                   },
-                },
-                // {
-                //   name: "categories",
-                //   list: "/categories",
-                //   create: "/categories/create",
-                //   edit: "/categories/edit/:id",
-                //   show: "/categories/show/:id",
-                //   meta: {
-                //     canDelete: true,
-                //   },
-                // },
-              ]}
-              options={{
-                syncWithLocation: true,
-                warnWhenUnsavedChanges: true,
-              }}
-            >
-              {props.children}
-              <RefineKbar />
-              <UnsavedChangesNotifier />
-            </Refine>
+                  // {
+                  //   name: "categories",
+                  //   list: "/categories",
+                  //   create: "/categories/create",
+                  //   edit: "/categories/edit/:id",
+                  //   show: "/categories/show/:id",
+                  //   meta: {
+                  //     canDelete: true,
+                  //   },
+                  // },
+                ]}
+                options={{
+                  syncWithLocation: true,
+                  warnWhenUnsavedChanges: true,
+                }}
+              >
+                <Routes>
+                  <Route
+                    element={
+                      <Authenticated fallback={<CatchAll />}>
+                        <ThemedLayoutV2>
+                          <Outlet />
+                        </ThemedLayoutV2>
+
+                      </Authenticated>
+
+                    }
+                  >
+                    <Route
+                      index
+                      element={<NavigateToResource resource="blog_posts" />}
+                    />
+
+                    <Route path="blog-posts">
+                      <Route index element={<BlogPostList />} />
+                      <Route path="show/:id" element={<BlogPostShow />} />
+                      <Route path="edit/:id" element={<BlogPostEdit />} />
+                      <Route path="create" element={<BlogPostCreate />} />
+                    </Route>
+
+                    <Route path="*" element={<ErrorComponent />} />
+                  </Route>
+                </Routes>
+                <RefineKbar />
+                <UnsavedChangesNotifier />
+              </Refine>
+            </BrowserRouter>
           </RefineSnackbarProvider>
         </ColorModeContextProvider>
       </RefineKbarProvider>
